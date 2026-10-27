@@ -1,0 +1,48 @@
+# Baut Markus' X-Notes-Version auf den Servern von GitHub (GitHub Actions).
+# Läuft bei jedem Push auf den Branch "markus" oder per Knopf ("Run workflow").
+# Ergebnis: eine APK zum Herunterladen unter Actions → Lauf → Artifacts.
+name: Build Markus APK
+
+on:
+  push:
+    branches: [markus]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      # Versionen wie im Projekt festgelegt (app/build.gradle.kts).
+      - name: NDK und CMake installieren
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;27.0.12077973" "cmake;3.22.1"
+
+      # Immer derselbe Signaturschlüssel, sonst lässt Android keine Updates zu
+      # (jeder GitHub-Server würde sonst einen neuen Debug-Schlüssel erzeugen).
+      - name: Festen Debug-Schlüssel einsetzen
+        env:
+          DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
+        run: |
+          test -n "$DEBUG_KEYSTORE_B64" || { echo "Secret DEBUG_KEYSTORE_B64 fehlt"; exit 1; }
+          mkdir -p ~/.android
+          echo "$DEBUG_KEYSTORE_B64" | base64 -d > ~/.android/debug.keystore
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: APK bauen (nur arm64 für das Xiaomi Pad 7)
+        run: ./gradlew assembleDebug -Pandroid.injected.build.abi=arm64-v8a
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: xnotes-markus-apk
+          path: app/build/outputs/apk/debug/*.apk
+          retention-days: 30
