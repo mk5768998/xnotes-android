@@ -69,6 +69,10 @@ android {
                 keyPassword = keystoreProperties.getProperty("keyPassword")
             }
         }
+        // CI signs debug builds with a fixed keystore so installed builds can be updated.
+        System.getenv("XNOTES_DEBUG_KEYSTORE")?.let { path ->
+            getByName("debug") { storeFile = file(path) }
+        }
     }
 
     buildTypes {

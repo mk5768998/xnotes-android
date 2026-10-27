@@ -33,13 +33,21 @@ jobs:
           DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
         run: |
           test -n "$DEBUG_KEYSTORE_B64" || { echo "Secret DEBUG_KEYSTORE_B64 fehlt"; exit 1; }
-          mkdir -p ~/.android
-          echo "$DEBUG_KEYSTORE_B64" | base64 -d > ~/.android/debug.keystore
+          echo "$DEBUG_KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/debug.keystore"
+          # Wird in app/build.gradle.kts als Debug-Schlüssel eingesetzt.
+          echo "XNOTES_DEBUG_KEYSTORE=$RUNNER_TEMP/debug.keystore" >> "$GITHUB_ENV"
 
       - uses: gradle/actions/setup-gradle@v5
 
       - name: APK bauen (nur arm64 für das Xiaomi Pad 7)
         run: ./gradlew assembleDebug -Pxnotes.abi=arm64-v8a
+
+      # Bricht ab, wenn die APK nicht mit Markus' Schlüssel signiert ist.
+      - name: Signatur prüfen
+        run: |
+          APKSIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)
+          "$APKSIGNER" verify --print-certs app/build/outputs/apk/debug/*.apk \
+            | grep -i "95e0428294f37c2c03a2abaefbce12619e7aa9496e0f7df8f1ae265cd380fd48"
 
       - uses: actions/upload-artifact@v5
         with:
