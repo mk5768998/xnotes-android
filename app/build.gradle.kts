@@ -28,7 +28,9 @@ android {
         versionCode = 67
         versionName = "0.9.6"
         ndk {
-            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
+            // -Pxnotes.abi=arm64-v8a builds a single ABI (faster CI); default is all three.
+            abiFilters += providers.gradleProperty("xnotes.abi").orNull?.split(",")
+                ?: listOf("arm64-v8a", "armeabi-v7a", "x86_64")
         }
         externalNativeBuild {
             cmake {

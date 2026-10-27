@@ -39,12 +39,11 @@ jobs:
       - uses: gradle/actions/setup-gradle@v5
 
       - name: APK bauen (nur arm64 für das Xiaomi Pad 7)
-        run: ./gradlew assembleDebug -Pandroid.injected.build.abi=arm64-v8a
+        run: ./gradlew assembleDebug -Pxnotes.abi=arm64-v8a
 
       - uses: actions/upload-artifact@v5
         with:
           name: xnotes-markus-apk
-          # Mit -Pandroid.injected.build.abi landet die APK unter intermediates/, daher breit suchen.
-          path: app/build/**/apk/debug/*.apk
+          path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 30
