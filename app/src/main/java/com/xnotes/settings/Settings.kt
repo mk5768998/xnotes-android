@@ -20,6 +20,7 @@ import com.xnotes.core.tools.ShapeConfig
 import com.xnotes.core.shapes.ShapeKind
 import com.xnotes.core.tools.Tool
 import com.xnotes.core.tools.ToolConfig
+import com.xnotes.core.tools.ToolConversions
 import com.xnotes.core.tools.ToolDefaults
 import com.xnotes.core.tools.ToolbarLayout
 import org.json.JSONArray
@@ -51,6 +52,8 @@ data class Settings(
     val shapeConfig: ShapeConfig = ShapeConfig(),
     val toolbarColors: List<Rgba> = InkPalette.presets,
     val toolbarColorCount: Int = 5,
+    /** The quick ink bar's width favourites of each stroke tool; tools left out keep [WidthPresets.defaults]. */
+    val widthPresets: Map<Tool, List<Double>> = emptyMap(),
     val toolbarLayout: ToolbarLayout = ToolbarLayout.DEFAULT,
     /** The infinite canvas's own bar. A separate layout because the two hold different items. */
     val canvasToolbarLayout: ToolbarLayout = ToolbarLayout.CANVAS_DEFAULT,
@@ -98,6 +101,14 @@ data class Settings(
 
     fun swatchesFor(role: SwatchRole): List<Rgba> = swatches[role] ?: role.defaults
 
+    fun widthPresetsFor(tool: Tool): List<Double> = widthPresets[tool] ?: WidthPresets.defaults(tool)
+
+    fun withWidthPreset(tool: Tool, index: Int, width: Double): Settings {
+        val current = widthPresetsFor(tool)
+        if (index !in current.indices) return this
+        return copy(widthPresets = widthPresets + (tool to current.toMutableList().also { it[index] = width }))
+    }
+
     fun withSwatch(role: SwatchRole, index: Int, color: Rgba): Settings {
         val current = swatchesFor(role)
         if (index !in current.indices) return this
@@ -114,6 +125,11 @@ data class Settings(
             .put("tools", toolsObj)
             .put("toolbar_colors", JSONArray().apply { toolbarColors.forEach { put(rgbaArr(it)) } })
             .put("toolbar_color_count", toolbarColorCount)
+            .apply {
+                if (widthPresets.isNotEmpty()) put("width_presets", JSONObject().apply {
+                    widthPresets.forEach { (tool, widths) -> put(tool.id, JSONArray().apply { widths.forEach { put(it) } }) }
+                })
+            }
             .put("toolbar_layout", toolbarLayoutJson(toolbarLayout))
             .put("canvas_toolbar_layout", toolbarLayoutJson(canvasToolbarLayout))
             .put("active_color", activeColor)
@@ -165,6 +181,7 @@ data class Settings(
                 shapeConfig = shape,
                 toolbarColors = colors.take(InkPalette.MAX_SWATCHES),
                 toolbarColorCount = o.optInt("toolbar_color_count", 5).coerceIn(1, InkPalette.MAX_SWATCHES),
+                widthPresets = widthPresets(o.optJSONObject("width_presets")),
                 toolbarLayout = toolbarLayout(o.optJSONObject("toolbar_layout")),
                 canvasToolbarLayout = toolbarLayout(
                     o.optJSONObject("canvas_toolbar_layout"),
@@ -198,6 +215,20 @@ data class Settings(
                 prefs = Preferences.fromJson(o.optJSONObject("prefs")),
                 fingerDrawAutoChecked = o.optBoolean("finger_draw_auto_checked", false),
             )
+        }
+
+        /** Each saved tool's favourites, padded or cut to [WidthPresets.COUNT] and kept in its width range. */
+        private fun widthPresets(o: JSONObject?): Map<Tool, List<Double>> {
+            if (o == null) return emptyMap()
+            return o.keys().asSequence().mapNotNull { id ->
+                val tool = Tool.fromId(id)?.takeIf { it.isStroke } ?: return@mapNotNull null
+                val a = o.optJSONArray(id) ?: return@mapNotNull null
+                val range = ToolConversions.widthRange(tool)
+                val defaults = WidthPresets.defaults(tool)
+                tool to List(WidthPresets.COUNT) { i ->
+                    if (i < a.length()) a.optDouble(i, defaults[i]).coerceIn(range) else defaults[i]
+                }
+            }.toMap()
         }
 
         /** Each saved role padded or cut to [SwatchRole.COUNT], filling gaps from its defaults. */

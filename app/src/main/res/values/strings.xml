@@ -68,6 +68,7 @@
     <string name="caption_speed">Speed</string>
     <string name="caption_tip_width">Tip width percentage</string>
     <string name="caption_width">Width</string>
+    <string name="width_favourite">Width favourite %1$d</string>
     <string name="caption_scale">Scale</string>
     <string name="caption_dash">Dash</string>
     <string name="caption_gap">Gap</string>

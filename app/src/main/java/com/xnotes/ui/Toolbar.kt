@@ -270,7 +270,8 @@ private fun ToolbarItemView(
 
         ToolbarItem.FULLSCREEN -> ToolbarIcon(XnotesIcons.fullscreen, stringResource(R.string.toolbar_fullscreen), shortcut = Keys.FULLSCREEN) { onToggleFullscreen() }
 
-        ToolbarItem.COLORS -> editor.toolbarColors.take(editor.toolbarColorCount).forEachIndexed { i, color ->
+        // While a stroke tool is armed the swatches sit in the quick ink bar instead (see QuickInkBar).
+        ToolbarItem.COLORS -> if (!editor.tool.isStroke) editor.toolbarColors.take(editor.toolbarColorCount).forEachIndexed { i, color ->
             Box {
                 Swatch(
                     color = color.toComposeColor(),

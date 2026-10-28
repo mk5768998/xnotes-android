@@ -560,6 +560,12 @@ class Editor(context: Context, val pane: Pane = Pane.PRIMARY) : ToolPopupHost, S
         private set
     var toolbarColorCount by mutableStateOf(5)
         private set
+    /** The quick ink bar's width favourites, per stroke tool (see [QuickInkBar]). */
+    var widthPresets by mutableStateOf<Map<Tool, List<Double>>>(emptyMap())
+        private set
+    /** Bumped whenever a tool's style changes, so the quick ink bar re-reads the live width. */
+    var toolStyleVersion by mutableStateOf(0)
+        private set
     var toolbarLayout by mutableStateOf(ToolbarLayout.DEFAULT)
 
     /** The infinite canvas's own bar. Its own layout: the two surfaces hold different items. */
@@ -2661,6 +2667,7 @@ class Editor(context: Context, val pane: Pane = Pane.PRIMARY) : ToolPopupHost, S
     private fun applySettings() {
         toolbarColors = settings.toolbarColors
         toolbarColorCount = settings.toolbarColorCount
+        widthPresets = settings.widthPresets
         toolbarLayout = settings.toolbarLayout
         canvasToolbarLayout = settings.canvasToolbarLayout
         activeColorIndex = settings.activeColor.coerceIn(0, toolbarColorCount - 1)
@@ -6400,6 +6407,22 @@ class Editor(context: Context, val pane: Pane = Pane.PRIMARY) : ToolPopupHost, S
 
     override fun updateToolConfig(tool: Tool, config: com.xnotes.core.tools.ToolConfig) {
         controller.setToolConfig(tool, config.copy(rgba = controller.inkColor))
+        toolStyleVersion++
+    }
+
+    fun widthPresetsFor(tool: Tool): List<Double> = widthPresets[tool] ?: com.xnotes.settings.WidthPresets.defaults(tool)
+
+    /** Draw [tool] at [width] from now on, as its config popup's width slider would. */
+    fun pickWidth(tool: Tool, width: Double) {
+        updateToolConfig(tool, toolConfig(tool).copy(baseWidth = width))
+    }
+
+    /** Retune width favourite [index] of [tool], persist it, and draw at it. */
+    fun setWidthPreset(tool: Tool, index: Int, width: Double) {
+        settings = settings.withWidthPreset(tool, index, width)
+        widthPresets = settings.widthPresets
+        settingsRepo.save(settings)
+        pickWidth(tool, width)
     }
 
     val recentColors: List<Rgba> get() = settings.recentColors

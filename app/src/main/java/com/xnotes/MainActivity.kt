@@ -1534,6 +1534,7 @@ private fun EditorPane(
                                 com.xnotes.ui.TextEditorOverlay(editor, field)
                             }
                             floatingBar()
+                            com.xnotes.ui.QuickInkBarOverlay(editor)
                             com.xnotes.ui.SelectionMenu(
                                 editor,
                                 onSaveAudio = { actions.onSaveAudio(editor, it) },
