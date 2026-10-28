@@ -152,7 +152,7 @@ fun Toolbar(
     }
     val sections = editor.toolbarLayout.visibleSections
     // Pinned outside the scrolling strip so closing a split pane is always one tap away.
-    val trailing = onClosePane?.let { { ClosePaneButton(it) } }
+    val trailing: (@Composable () -> Unit)? = onClosePane?.let { { ClosePaneButton(it) } }
     val look = LocalToolbarLook.current
     if (look.floating && !look.position.vertical && sections.size >= 3) {
         ToolbarPills(
