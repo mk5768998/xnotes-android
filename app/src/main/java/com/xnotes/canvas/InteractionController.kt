@@ -90,6 +90,7 @@ import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.exp
+import kotlin.math.hypot
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sin
@@ -231,6 +232,9 @@ class InteractionController(
 
     /** Whether holding a freehand ink stroke still snaps it to a recognized shape (spec: "hold to snap"). */
     var detectShapes: Boolean = false
+
+    /** Whether a pen loop held still round ink selects that ink (circle to lasso). */
+    var circleLasso: Boolean = false
 
     /** Tool the stylus side button activates while held, or null to ignore the button. */
     var penButtonTool: Tool? = Tool.ERASER
@@ -1426,8 +1430,10 @@ class InteractionController(
         val page = state.document.pages.getOrNull(pageIndex) ?: return false
         val path = List(stroke.sampleCount) { Pt(stroke.xAt(it), stroke.yAt(it)) }
         val bounds = Rect.bounding(path)
-        val span = hypot(bounds.width, bounds.height)
-        if (span <= 0.0 || path.first().distanceTo(path.last()) > span * LOOP_CLOSE_FRACTION) return false
+        val span = hypot(bounds.w, bounds.h)
+        // Too small on screen to be a lasso: a written "o" or "e" held at its end stays ink.
+        if (span * state.zoom / state.devicePxPerDp < LOOP_MIN_DP) return false
+        if (path.first().distanceTo(path.last()) > span * LOOP_CLOSE_FRACTION) return false
         val members = SelectionMath.lassoMembers(page.items, path)
         if (members.isEmpty()) return false
         // The stroke was never added to the page, so clearing it takes the loop's ink off at once.
@@ -4955,6 +4961,12 @@ class InteractionController(
 
         /** Hold-to-snap: minimum samples before recognition is even attempted (mirrors the recognizer). */
         const val SHAPE_MIN_SAMPLES = 8
+
+        /** Circle to lasso: a stroke is a closed loop when its ends lie within this share of its diagonal. */
+        const val LOOP_CLOSE_FRACTION = 0.25
+
+        /** Circle to lasso: smallest loop (diagonal, dp on screen) that may select; smaller stays ink. */
+        const val LOOP_MIN_DP = 48.0
 
         /** Shape size -> thickness: the midpoint of the default pen's pressure width range (m=0.35..1.0),
          *  so a shape reads as thick as a same-size pen instead of as a flat full-width line. */
