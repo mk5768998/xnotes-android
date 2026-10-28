@@ -523,6 +523,16 @@ class Editor(context: Context, val pane: Pane = Pane.PRIMARY) : ToolPopupHost, S
 
     var tool by mutableStateOf(Tool.DEFAULT)
         private set
+
+    // Up here with [tool], not by [selectTool]: the init blocks arm the saved tool, and a field
+    // declared further down would not exist yet when they do.
+    /** The pen type the toolbar's single pen button stands for and re-arms (see [PenButton]). */
+    var lastPen by mutableStateOf(Tool.PEN)
+        private set
+
+    /** The solid pen type the quick ink bar's solid line goes back to from the dashed pen. */
+    private var lastSolidPen = Tool.PEN
+
     var palette by mutableStateOf(state.palette)
         private set
     /** How round the chrome is, [Preferences.cornerStyle]. */
@@ -6234,13 +6244,6 @@ class Editor(context: Context, val pane: Pane = Pane.PRIMARY) : ToolPopupHost, S
         if (armed in PEN_TYPES) lastPen = armed
         if (armed in PEN_TYPES && armed != Tool.DASHED) lastSolidPen = armed
     }
-
-    /** The pen type the toolbar's single pen button stands for and re-arms (see [PenButton]). */
-    var lastPen by mutableStateOf(Tool.PEN)
-        private set
-
-    /** The solid pen type the quick ink bar's solid line goes back to from the dashed pen. */
-    private var lastSolidPen = Tool.PEN
 
     /** The line the armed pen draws, as the quick ink bar shows it: the dashed pen's two modes, else solid. */
     val linePattern: LinePattern
