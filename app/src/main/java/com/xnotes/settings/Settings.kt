@@ -396,6 +396,7 @@ data class Settings(
             .put("neon_strength", c.neonStrength)
             .put("dash_length", c.dashLength)
             .put("dash_gap", c.dashGap)
+            .put("dotted", c.dotted)
             .put("erase_mode", c.eraseMode.id)
             .put("switch_back_after_erase", c.switchBackAfterErase)
             .put("erase_markups", c.eraseMarkups)
@@ -428,6 +429,7 @@ data class Settings(
                 neonStrength = o.optDouble("neon_strength", d.neonStrength),
                 dashLength = o.optDouble("dash_length", d.dashLength),
                 dashGap = o.optDouble("dash_gap", d.dashGap),
+                dotted = o.optBoolean("dotted", d.dotted),
                 eraseMode = EraseMode.fromId(o.optString("erase_mode", d.eraseMode.id)),
                 switchBackAfterErase = o.optBoolean("switch_back_after_erase", d.switchBackAfterErase),
                 eraseMarkups = o.optBoolean("erase_markups", d.eraseMarkups),

@@ -419,8 +419,8 @@ class Stroke(
                     width = config.baseWidth,
                     cosmetic = false,
                     dashed = true,
-                    dashOn = config.dashLength,
-                    dashGap = config.dashGap,
+                    dashOn = config.dashOn,
+                    dashGap = config.dashOff(),
                     dashPhase = dashPhase,
                 ),
             )
@@ -449,8 +449,8 @@ class Stroke(
                     width = config.baseWidth,
                     cosmetic = false,
                     dashed = true,
-                    dashOn = config.dashLength,
-                    dashGap = config.dashGap,
+                    dashOn = config.dashOn,
+                    dashGap = config.dashOff(),
                 ),
             )
         } else {

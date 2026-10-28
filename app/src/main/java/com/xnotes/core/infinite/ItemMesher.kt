@@ -203,7 +203,7 @@ object ItemMesher {
         val mesh = if (stroke.tool == Tool.DASHED) {
             StrokeTessellator.tessellateDashed(
                 ribbon, from, count,
-                stroke.config.dashLength, stroke.config.dashGap, stroke.config.baseWidth / 2.0,
+                stroke.config.dashOn, stroke.config.dashOff(), stroke.config.baseWidth / 2.0,
                 dashPhase, tolerance,
             )
         } else {
@@ -222,8 +222,8 @@ object ItemMesher {
         val half = stroke.config.baseWidth / 2.0
         val mesh = StrokeTessellator.tessellateDashed(
             stroke.geometry(),
-            stroke.config.dashLength,
-            stroke.config.dashGap,
+            stroke.config.dashOn,
+            stroke.config.dashOff(),
             half,
             tolerance,
         )

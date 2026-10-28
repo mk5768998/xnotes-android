@@ -1421,7 +1421,7 @@ class InteractionController(
         // A neon pen snaps to a neon shape (the highlighter never snaps).
         val shape = rec.toShape(
             color, strokeWidth, shapeConfig.fillFor(rec.kind, color), stroke.config.neon, stroke.config.neonStrength,
-            dashed, stroke.config.dashLength, stroke.config.dashGap,
+            dashed, stroke.config.dashOn, stroke.config.dashOff(strokeWidth),
         )
         page.items.add(shape)
         state.appendToCache(page, shape)

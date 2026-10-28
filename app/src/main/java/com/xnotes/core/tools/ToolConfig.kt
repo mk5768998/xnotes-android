@@ -102,7 +102,17 @@ data class ToolConfig(
     /** Stabilisation, 0 (as drawn) to [STABILIZATION_MAX]: lengthens the ribbon's smoothing so a
      *  shaky hand draws steadier lines, at the cost of the ink trailing the nib a little. Stroke tools. */
     val stabilization: Double = 0.0,
+    /** Dashed pen: dots instead of dashes. Each dash shrinks to a round-capped dot as wide as the
+     *  line, and [dashGap] becomes the space between the dots. Only used by [Tool.DASHED]. */
+    val dotted: Boolean = false,
 ) {
+    /** Length of each drawn run of the dashed pen: a tiny one for a dot, else [dashLength]. */
+    val dashOn: Double get() = if (dotted) DOT_ON else dashLength
+
+    /** Space from one run to the next for a line [width] wide. A dot's round caps reach half a
+     *  width either side, so the dotted pen adds that back to keep [dashGap] clear between dots. */
+    fun dashOff(width: Double = baseWidth): Double = if (dotted) dashGap + width else dashGap
+
     /** What a new stroke's `smoothScale` is multiplied by for this tool's [stabilization]. */
     val smoothFactor: Double get() = 1.0 + stabilization.coerceIn(0.0, STABILIZATION_MAX) * STABILIZATION_STEP
 
@@ -112,6 +122,8 @@ data class ToolConfig(
         const val STABILIZATION_MAX = 10.0
         /** Each stabilisation step adds half the default smoothing length, so 10 smooths 6x as far. */
         private const val STABILIZATION_STEP = 0.5
+        /** A dot's run: next to nothing, so the round caps alone draw it. */
+        const val DOT_ON = 0.05
     }
 }
 

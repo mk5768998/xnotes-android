@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- XNotes — dotted pen stroke. Round dots along the dashed pen's S-curve centerline, evenly spaced. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M 5.40,22 A 4.6,4.6 0 1 0 14.60,22 A 4.6,4.6 0 1 0 5.40,22 Z M 14.40,32 A 4.6,4.6 0 1 0 23.60,32 A 4.6,4.6 0 1 0 14.40,32 Z M 23.40,45 A 4.6,4.6 0 1 0 32.60,45 A 4.6,4.6 0 1 0 23.40,45 Z M 32.40,58 A 4.6,4.6 0 1 0 41.60,58 A 4.6,4.6 0 1 0 32.40,58 Z M 41.40,71 A 4.6,4.6 0 1 0 50.60,71 A 4.6,4.6 0 1 0 41.40,71 Z M 53.40,80 A 4.6,4.6 0 1 0 62.60,80 A 4.6,4.6 0 1 0 53.40,80 Z M 65.40,77 A 4.6,4.6 0 1 0 74.60,77 A 4.6,4.6 0 1 0 65.40,77 Z M 74.40,65 A 4.6,4.6 0 1 0 83.60,65 A 4.6,4.6 0 1 0 74.40,65 Z M 82.40,52 A 4.6,4.6 0 1 0 91.60,52 A 4.6,4.6 0 1 0 82.40,52 Z M 89.40,40 A 4.6,4.6 0 1 0 98.60,40 A 4.6,4.6 0 1 0 89.40,40 Z"/>
+</vector>

@@ -1790,7 +1790,7 @@ class InfiniteInteraction(
         val dashed = stroke.tool == Tool.DASHED // a dashed pen snaps to a dashed shape
         val shape = rec.toShape(
             color, width, shapeConfig().fillFor(rec.kind, color), stroke.config.neon, stroke.config.neonStrength,
-            dashed, stroke.config.dashLength, stroke.config.dashGap,
+            dashed, stroke.config.dashOn, stroke.config.dashOff(width),
         )
         // The stroke was never committed, so dropping it makes the wet ink vanish the moment it
         // snaps; the eventual pen up then commits nothing.

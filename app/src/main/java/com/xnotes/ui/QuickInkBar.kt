@@ -1,5 +1,6 @@
 package com.xnotes.ui
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -25,8 +26,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.xnotes.R
@@ -40,7 +47,8 @@ import kotlin.math.pow
 
 /**
  * The quick ink bar: a floating pill under the toolbar while a stroke tool is armed, holding three
- * width favourites and the toolbar's colour swatches (the main bar drops its swatches meanwhile).
+ * width favourites, for a pen the line it draws (solid, dotted or dashed), and the toolbar's colour
+ * swatches (the main bar drops its swatches meanwhile).
  * Tapping a width draws at it; tapping the armed one again opens a slider that retunes it.
  */
 @Composable
@@ -73,6 +81,13 @@ fun QuickInkBar(editor: Editor, modifier: Modifier = Modifier) {
                         if (i == armed) tuning = i else editor.pickWidth(tool, w)
                     }
                     if (tuning == i) WidthTunePopup(editor, tool, i) { tuning = null }
+                }
+            }
+            if (tool in PEN_TYPES) {
+                val pattern = remember(tool, editor.toolStyleVersion) { editor.linePattern }
+                Separator()
+                LinePattern.entries.forEach { p ->
+                    PatternChip(p, active = p == pattern) { editor.pickLinePattern(p) }
                 }
             }
             Separator()
@@ -128,6 +143,53 @@ private fun WidthChip(tool: Tool, width: Double, active: Boolean, onClick: () ->
         }
     }
 }
+
+/** The line a pen draws, as the quick ink bar offers it (see [Editor.pickLinePattern]). */
+enum class LinePattern(val labelRes: Int) {
+    SOLID(R.string.line_solid),
+    DOTTED(R.string.line_dotted),
+    DASHED(R.string.line_dashed),
+}
+
+/** A line pattern: a short line drawn in that pattern, highlighted like a width favourite when armed. */
+@Composable
+private fun PatternChip(pattern: LinePattern, active: Boolean, onClick: () -> Unit) {
+    val palette = LocalPalette.current
+    val bar = LocalBar.current
+    val label = stringResource(pattern.labelRes)
+    Box(
+        Modifier
+            .size(bar.button)
+            .semantics { contentDescription = label }
+            .clickable(remember { MutableInteractionSource() }, indication = null, role = Role.Button, onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            Modifier
+                .size(bar.circle)
+                .clip(CircleShape)
+                .background(if (active) palette.selectionBackground.toComposeColor() else Color.Transparent),
+            contentAlignment = Alignment.Center,
+        ) {
+            val ink = (if (active) palette.selectionForeground else palette.textDim).toComposeColor()
+            Canvas(Modifier.width(bar.icon).height(bar.icon)) {
+                val stroke = PATTERN_STROKE.toPx()
+                val y = size.height / 2
+                val effect = when (pattern) {
+                    LinePattern.SOLID -> null
+                    // A near-zero dash plus a round cap is a dot; the gap is measured centre to centre.
+                    LinePattern.DOTTED -> PathEffect.dashPathEffect(floatArrayOf(0.01f, stroke * 2.2f))
+                    LinePattern.DASHED -> PathEffect.dashPathEffect(floatArrayOf(stroke * 2.2f, stroke * 1.8f))
+                }
+                // Inset by the round cap, so the line's ends sit inside the icon box.
+                drawLine(ink, Offset(stroke / 2, y), Offset(size.width - stroke / 2, y), stroke, StrokeCap.Round, effect)
+            }
+        }
+    }
+}
+
+/** How thick a pattern chip's sample line draws. */
+private val PATTERN_STROKE = 2.5.dp
 
 /** How thick a favourite's stroke shows: 2dp at the thin end of the range up to half the icon. */
 private fun chipThickness(tool: Tool, width: Double, icon: Dp): Dp {

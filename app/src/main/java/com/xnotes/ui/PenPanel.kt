@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -65,7 +66,9 @@ internal fun PenButton(
 ) {
     val armed = editor.tool in PEN_TYPES
     val tool = if (armed) editor.tool else editor.lastPen
-    val icon = toolIcons[tool] ?: return
+    // The dashed pen in its dotted mode shows dots, as the quick ink bar draws it.
+    val dotted = tool == Tool.DASHED && remember(editor.toolStyleVersion) { editor.toolConfig(Tool.DASHED).dotted }
+    val icon = (if (dotted) ImageVector.vectorResource(R.drawable.ic_stroke_dotted) else toolIcons[tool]) ?: return
     Box {
         ToolbarIcon(
             icon,
@@ -176,7 +179,9 @@ private fun PenSettings(editor: Editor, tool: Tool, toolIcons: Map<Tool, ImageVe
             0f..100f,
         ) { emit(config.copy(taperMinFactor = it / 100.0)) }
         Tool.DASHED -> {
-            SliderRow(stringResource(R.string.caption_dash), config.dashLength.toFloat(), 2f..40f) { emit(config.copy(dashLength = it.toDouble())) }
+            ToggleRow(stringResource(R.string.caption_dotted), config.dotted) { emit(config.copy(dotted = it)) }
+            // A dot is as long as the line is wide, so only the dashes have a length to set.
+            if (!config.dotted) SliderRow(stringResource(R.string.caption_dash), config.dashLength.toFloat(), 2f..40f) { emit(config.copy(dashLength = it.toDouble())) }
             SliderRow(stringResource(R.string.caption_gap), config.dashGap.toFloat(), 2f..40f) { emit(config.copy(dashGap = it.toDouble())) }
         }
         else -> Unit
@@ -226,7 +231,7 @@ private fun PenSettings(editor: Editor, tool: Tool, toolIcons: Map<Tool, ImageVe
 
 /**
  * A sample S-curve in the pen's width and colour. Only an impression: it draws a plain line
- * (dashed for the dashed pen), not the engine's pressure, direction or taper shaping.
+ * (dashed or dotted for the dashed pen), not the engine's pressure, direction or taper shaping.
  */
 @Composable
 private fun PenPreview(tool: Tool, config: ToolConfig, ink: androidx.compose.ui.graphics.Color) {
@@ -248,7 +253,7 @@ private fun PenPreview(tool: Tool, config: ToolConfig, ink: androidx.compose.ui.
         }
         val px = (config.baseWidth.toFloat() * density * PREVIEW_SCALE).coerceAtMost(h * 0.4f)
         val dash = if (tool == Tool.DASHED) {
-            PathEffect.dashPathEffect(floatArrayOf(config.dashLength.toFloat() * density * PREVIEW_SCALE, config.dashGap.toFloat() * density * PREVIEW_SCALE))
+            PathEffect.dashPathEffect(floatArrayOf(config.dashOn.toFloat() * density * PREVIEW_SCALE, config.dashOff().toFloat() * density * PREVIEW_SCALE))
         } else null
         drawPath(path, ink, style = Stroke(width = px, cap = StrokeCap.Round, pathEffect = dash))
         // A faint dot where the preview starts, so a white ink on white paper still shows.

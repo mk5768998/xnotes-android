@@ -78,6 +78,10 @@
     <string name="caption_scale">Scale</string>
     <string name="caption_dash">Dash</string>
     <string name="caption_gap">Gap</string>
+    <string name="caption_dotted">Dotted</string>
+    <string name="line_solid">Solid line</string>
+    <string name="line_dotted">Dotted line</string>
+    <string name="line_dashed">Dashed line</string>
     <string name="caption_intensity">Intensity</string>
     <string name="caption_straight_line">Straight line</string>
     <string name="caption_inverse">Inverse</string>

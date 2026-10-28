@@ -6232,11 +6232,41 @@ class Editor(context: Context, val pane: Pane = Pane.PRIMARY) : ToolPopupHost, S
         controller.setTool(armed)
         tool = armed
         if (armed in PEN_TYPES) lastPen = armed
+        if (armed in PEN_TYPES && armed != Tool.DASHED) lastSolidPen = armed
     }
 
     /** The pen type the toolbar's single pen button stands for and re-arms (see [PenButton]). */
     var lastPen by mutableStateOf(Tool.PEN)
         private set
+
+    /** The solid pen type the quick ink bar's solid line goes back to from the dashed pen. */
+    private var lastSolidPen = Tool.PEN
+
+    /** The line the armed pen draws, as the quick ink bar shows it: the dashed pen's two modes, else solid. */
+    val linePattern: LinePattern
+        get() = when {
+            tool != Tool.DASHED -> LinePattern.SOLID
+            toolConfig(Tool.DASHED).dotted -> LinePattern.DOTTED
+            else -> LinePattern.DASHED
+        }
+
+    /**
+     * Draw [pattern] from now on. Dotted and dashed are the dashed pen's two modes; solid goes back
+     * to the pen type last drawn solid with. The width carries over, so the line only changes its
+     * pattern, not its thickness.
+     */
+    fun pickLinePattern(pattern: LinePattern) {
+        val from = tool
+        val width = toolConfig(from).baseWidth
+        val to = if (pattern == LinePattern.SOLID) (if (from == Tool.DASHED) lastSolidPen else from) else Tool.DASHED
+        val dotted = pattern == LinePattern.DOTTED
+        val config = toolConfig(to)
+        if (to == Tool.DASHED && config.dotted != dotted) updateToolConfig(to, config.copy(dotted = dotted))
+        if (to != from) {
+            selectTool(to)
+            pickWidth(to, width)
+        }
+    }
 
 
     /** Run the action a two/three-finger tap or stylus double-tap is mapped to; "none" does nothing. */

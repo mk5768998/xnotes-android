@@ -394,6 +394,7 @@ class DocumentCodec(
         if (s.tool == Tool.DASHED) {
             j.name("dash_length").value(s.config.dashLength)
             j.name("dash_gap").value(s.config.dashGap)
+            if (s.config.dotted) j.name("dotted").value(true)
         }
         // Strength matters only to the highlighter; baked per-stroke so a note reopens unchanged.
         if (s.tool == Tool.HIGHLIGHTER) {
@@ -1154,6 +1155,7 @@ class DocumentCodec(
         var neonStrength: Double? = null
         var dashLength: Double? = null
         var dashGap: Double? = null
+        var dotted: Boolean? = null
         var highlighterAlpha: Double? = null
         var highlighterInverse: Boolean? = null
     }
@@ -1298,6 +1300,7 @@ class DocumentCodec(
             neonStrength = c?.neonStrength ?: def.neonStrength,
             dashLength = c?.dashLength ?: def.dashLength,
             dashGap = c?.dashGap ?: def.dashGap,
+            dotted = c?.dotted ?: def.dotted,
             // Absent on legacy highlighter strokes -> the historical 0.35, so they reload unchanged.
             highlighterAlpha = c?.highlighterAlpha ?: def.highlighterAlpha,
             highlighterInverse = c?.highlighterInverse ?: def.highlighterInverse,
@@ -1497,6 +1500,7 @@ class DocumentCodec(
                 "neon_strength" -> c.neonStrength = doubleOrNull(p)
                 "dash_length" -> c.dashLength = doubleOrNull(p)
                 "dash_gap" -> c.dashGap = doubleOrNull(p)
+                "dotted" -> c.dotted = boolOrNull(p)
                 "highlighter_alpha" -> c.highlighterAlpha = doubleOrNull(p)
                 "highlighter_inverse" -> c.highlighterInverse = boolOrNull(p)
                 else -> p.skipValue()
