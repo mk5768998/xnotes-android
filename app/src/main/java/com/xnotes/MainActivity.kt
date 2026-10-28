@@ -93,6 +93,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import com.xnotes.R
 import com.xnotes.canvas.StylusButtonLatch
 import com.xnotes.ui.Editor
+import com.xnotes.ui.QuickInkBarOverlay
 import com.xnotes.ui.Toolbar
 import com.xnotes.ui.ToolbarAround
 import com.xnotes.ui.icons.XnotesIcons
@@ -1534,7 +1535,7 @@ private fun EditorPane(
                                 com.xnotes.ui.TextEditorOverlay(editor, field)
                             }
                             floatingBar()
-                            com.xnotes.ui.QuickInkBarOverlay(editor)
+                            QuickInkBarOverlay(editor)
                             com.xnotes.ui.SelectionMenu(
                                 editor,
                                 onSaveAudio = { actions.onSaveAudio(editor, it) },
