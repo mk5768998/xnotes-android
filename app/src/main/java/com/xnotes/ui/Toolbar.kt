@@ -217,8 +217,15 @@ private fun ToolbarItemView(
         ToolbarItem.SIDEBAR ->
             ToolbarIcon(XnotesIcons.sidebar, stringResource(R.string.side_panel), active = editor.sidebarVisible, shortcut = Keys.SIDEBAR) { editor.toggleSidebar() }
 
-        ToolbarItem.PEN, ToolbarItem.DASHED, ToolbarItem.CALLIGRAPHY, ToolbarItem.SPEED,
-        ToolbarItem.TAPER, ToolbarItem.HIGHLIGHTER, ToolbarItem.ERASER, ToolbarItem.PAN,
+        // One button for every pen type (see PenButton); the other types' own buttons step aside
+        // while it is on the bar, and come back if it is hidden in the toolbar customiser.
+        ToolbarItem.PEN -> PenButton(editor, toolIcons, configForTool, setConfigForTool)
+        ToolbarItem.DASHED, ToolbarItem.CALLIGRAPHY, ToolbarItem.SPEED, ToolbarItem.TAPER ->
+            if (!editor.toolbarLayout.visibleSections.any { s -> s.visibleEntries.any { it.item == ToolbarItem.PEN } }) {
+                Tool.fromId(item.id)?.let { ToolButton(editor, it, toolIcons[it], configForTool, setConfigForTool) }
+            }
+
+        ToolbarItem.HIGHLIGHTER, ToolbarItem.ERASER, ToolbarItem.PAN,
         ToolbarItem.SELECT, ToolbarItem.LASSO, ToolbarItem.SCREENSHOT, ToolbarItem.SHAPE,
         ToolbarItem.TEXT, ToolbarItem.TEXT_BOX, ToolbarItem.TAPE -> {
             val tool = Tool.fromId(item.id)

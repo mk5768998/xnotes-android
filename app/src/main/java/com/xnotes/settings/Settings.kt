@@ -409,6 +409,7 @@ data class Settings(
             .put("markup_intensity", c.markupIntensity)
             .put("tape_mode", c.tapeMode.id)
             .put("tape_pattern", c.tapePattern.id)
+            .put("stabilization", c.stabilization)
             .put("rgba", rgbaArr(c.rgba))
             .apply { c.colorOverride?.let { put("color_override", rgbaArr(it)) } }
 
@@ -441,6 +442,7 @@ data class Settings(
                     .coerceIn(ToolConfig.MARKUP_INTENSITY_MIN, 1.0),
                 tapeMode = if (o.has("tape_mode")) TapeMode.fromId(o.optString("tape_mode")) else d.tapeMode,
                 tapePattern = if (o.has("tape_pattern")) TapePattern.fromId(o.optString("tape_pattern")) else d.tapePattern,
+                stabilization = o.optDouble("stabilization", d.stabilization).coerceIn(0.0, ToolConfig.STABILIZATION_MAX),
                 colorOverride = o.optJSONArray("color_override")
                     ?.let { a -> Rgba.fromList((0 until a.length()).map { i -> a.optInt(i, 0) }) }
                     ?: d.colorOverride,

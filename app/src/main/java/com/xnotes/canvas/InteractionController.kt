@@ -1141,7 +1141,7 @@ class InteractionController(
         val straight = drawTool == Tool.HIGHLIGHTER && cfg.straightLine
         val stroke = Stroke(
             drawTool, cfg, speedScale = speedScale, straight = straight,
-            smoothScale = smoothScaleFor(state.zoom),
+            smoothScale = smoothScaleFor(state.zoom) * cfg.smoothFactor,
         )
         // Live until pen-up, so lift-time rules (the calligraphy dot swell) can't fire mid-draw.
         stroke.finished = false

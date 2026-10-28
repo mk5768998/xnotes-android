@@ -69,6 +69,12 @@
     <string name="caption_tip_width">Tip width percentage</string>
     <string name="caption_width">Width</string>
     <string name="width_favourite">Width favourite %1$d</string>
+    <string name="caption_stabilization">Stabilisation</string>
+    <string name="caption_pen_type">Pen type</string>
+    <string name="caption_more_options">More options</string>
+    <string name="thinner">Thinner</string>
+    <string name="thicker">Thicker</string>
+    <string name="close">Close</string>
     <string name="caption_scale">Scale</string>
     <string name="caption_dash">Dash</string>
     <string name="caption_gap">Gap</string>

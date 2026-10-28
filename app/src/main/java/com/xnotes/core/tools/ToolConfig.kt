@@ -99,10 +99,19 @@ data class ToolConfig(
     val tapeMode: TapeMode = TapeMode.STRAIGHT,
     /** Tape: what is printed on it. Only used by [Tool.TAPE]. */
     val tapePattern: TapePattern = TapePattern.SOLID,
+    /** Stabilisation, 0 (as drawn) to [STABILIZATION_MAX]: lengthens the ribbon's smoothing so a
+     *  shaky hand draws steadier lines, at the cost of the ink trailing the nib a little. Stroke tools. */
+    val stabilization: Double = 0.0,
 ) {
+    /** What a new stroke's `smoothScale` is multiplied by for this tool's [stabilization]. */
+    val smoothFactor: Double get() = 1.0 + stabilization.coerceIn(0.0, STABILIZATION_MAX) * STABILIZATION_STEP
+
     companion object {
         const val DEFAULT_MARKUP_INTENSITY = 0.9
         const val MARKUP_INTENSITY_MIN = 0.1
+        const val STABILIZATION_MAX = 10.0
+        /** Each stabilisation step adds half the default smoothing length, so 10 smooths 6x as far. */
+        private const val STABILIZATION_STEP = 0.5
     }
 }
 

@@ -789,7 +789,7 @@ class InfiniteInteraction(
             drawTool, config,
             speedScale = z / devicePxPerDp().coerceAtLeast(1e-9),
             straight = straight,
-            smoothScale = InteractionController.smoothScaleFor(z),
+            smoothScale = InteractionController.smoothScaleFor(z) * config.smoothFactor,
         )
         // Live until the pen lifts, so lift-time rules cannot fire mid-draw.
         stroke.finished = false

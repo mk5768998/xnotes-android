@@ -6231,7 +6231,12 @@ class Editor(context: Context, val pane: Pane = Pane.PRIMARY) : ToolPopupHost, S
         val armed = if (markupResting) Tool.PAN else t
         controller.setTool(armed)
         tool = armed
+        if (armed in PEN_TYPES) lastPen = armed
     }
+
+    /** The pen type the toolbar's single pen button stands for and re-arms (see [PenButton]). */
+    var lastPen by mutableStateOf(Tool.PEN)
+        private set
 
 
     /** Run the action a two/three-finger tap or stylus double-tap is mapped to; "none" does nothing. */
