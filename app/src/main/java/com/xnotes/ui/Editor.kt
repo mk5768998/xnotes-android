@@ -2755,6 +2755,7 @@ class Editor(context: Context, val pane: Pane = Pane.PRIMARY) : ToolPopupHost, S
         controller.fingerDraws = p.fingerDraws
         controller.zoomLockPan = p.zoomLockPan
         controller.detectShapes = p.detectShapes
+        controller.circleLasso = p.circleLasso
         flowText.markdownInput = p.markdownInput
         flowText.slashCommands = p.slashCommands
         flowText.highlight = { toolbarInk() }

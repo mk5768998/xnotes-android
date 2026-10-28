@@ -1165,7 +1165,8 @@ class InteractionController(
         // Shape snap: only solid ink pens (not the highlighter or its straight-line mode) arm the
         // "hold still → shape" timer — and never while the ruler is up (you're drawing straight lines),
         // nor under the wand, whose strokes are ephemeral and must never commit a shape to the page.
-        dwellEligible = detectShapes && drawTool.isStroke && drawTool != Tool.HIGHLIGHTER && !straight &&
+        // A held loop round ink selects it (circle to lasso), which rides the same timer.
+        dwellEligible = (detectShapes || circleLasso) && drawTool.isStroke && drawTool != Tool.HIGHLIGHTER && !straight &&
             !ruler.visible && !wandMode
         if (dwellEligible) {
             dwellAnchor = downViewport
@@ -1408,8 +1409,36 @@ class InteractionController(
         val stroke = liveStroke ?: return
         val pi = strokePageIndex ?: return
         if (stroke.samples.size < SHAPE_MIN_SAMPLES) return // not enough yet; the next move re-arms
+        // A loop round ink selects it; round nothing it falls through to the shape snap.
+        if (circleLasso && selectByLoop(stroke, pi)) return
+        if (!detectShapes) return
         val rec = ShapeRecognizer.recognize(stroke.samples) ?: return // not a shape; the next move re-arms
         commitRecognizedShape(stroke, pi, rec)
+    }
+
+    /**
+     * Circle to lasso: when the held live stroke closes on itself round ink of its page, drop the
+     * stroke and select that ink, as a lasso along the same path would. False when it isn't a loop
+     * or encloses nothing, and the stroke carries on as ink.
+     */
+    private fun selectByLoop(stroke: Stroke, pageIndex: Int): Boolean {
+        if (crossedSegments.isNotEmpty()) return false // it ran across a page edge
+        val page = state.document.pages.getOrNull(pageIndex) ?: return false
+        val path = List(stroke.sampleCount) { Pt(stroke.xAt(it), stroke.yAt(it)) }
+        val bounds = Rect.bounding(path)
+        val span = hypot(bounds.width, bounds.height)
+        if (span <= 0.0 || path.first().distanceTo(path.last()) > span * LOOP_CLOSE_FRACTION) return false
+        val members = SelectionMath.lassoMembers(page.items, path)
+        if (members.isEmpty()) return false
+        // The stroke was never added to the page, so clearing it takes the loop's ink off at once.
+        liveStroke = null
+        dwellEligible = false
+        cancelDwell()
+        setSelection(members.map { Selected(pageIndex, it) })
+        snappedSelectionPendingMenu = true
+        onHaptic()
+        requestRender()
+        return true
     }
 
     /** Replace the (uncommitted) live stroke with a recognized [ShapeItem], as one undoable add. */
