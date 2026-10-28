@@ -124,6 +124,32 @@ internal fun ColumnScope.ToolbarAround(
 }
 
 /**
+ * A floating bar along the top or bottom, split into three pills: [first] at the start, [last]
+ * (with [trailing]) at the end, and [middle] between them, scrolling when it runs long.
+ */
+@Composable
+internal fun ToolbarPills(
+    armed: Any?,
+    trailing: (@Composable () -> Unit)?,
+    first: @Composable () -> Unit,
+    middle: @Composable () -> Unit,
+    last: @Composable () -> Unit,
+) {
+    Row(
+        Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        ToolbarFrame(armed) { first() }
+        Box(Modifier.weight(1f, fill = false).padding(horizontal = PILL_GAP)) { ToolbarFrame(armed) { middle() } }
+        ToolbarFrame(armed, trailing) { last() }
+    }
+}
+
+/** The air between two pills. */
+private val PILL_GAP = 8.dp
+
+/**
  * The strip both toolbars are laid out in: a row along the top or bottom, a column down either
  * side. [content] runs along it and scrolls when it runs long, [trailing] stays pinned at the end,
  * and [armed] is the tool the gliding circle sits under.

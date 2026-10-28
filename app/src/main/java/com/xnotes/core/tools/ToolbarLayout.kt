@@ -178,10 +178,13 @@ data class ToolbarLayout(val sections: List<ToolbarSection>) {
         val NOTE_ITEMS: Set<ToolbarItem> =
             ToolbarItem.entries.toSet() - setOf(ToolbarItem.WAYPOINTS, ToolbarItem.MINIMAP)
 
-        /** Mirrors the hardcoded bar exactly (see Toolbar.kt) so existing users see no change. */
+        /**
+         * Laid out for the floating pills (see ToolbarPills): the first section is the navigation
+         * pill on the left, the last the view pill on the right, everything between the tools.
+         */
         val DEFAULT: ToolbarLayout = of(
-            listOf(ToolbarItem.HOME, ToolbarItem.TITLE),
-            listOf(ToolbarItem.SIDEBAR),
+            listOf(ToolbarItem.HOME, ToolbarItem.TITLE, ToolbarItem.SIDEBAR, ToolbarItem.PAGE_NAV),
+            listOf(ToolbarItem.UNDO, ToolbarItem.REDO),
             listOf(
                 ToolbarItem.PEN, ToolbarItem.DASHED, ToolbarItem.CALLIGRAPHY, ToolbarItem.SPEED,
                 ToolbarItem.TAPER, ToolbarItem.HIGHLIGHTER, ToolbarItem.ERASER,
@@ -190,10 +193,9 @@ data class ToolbarLayout(val sections: List<ToolbarSection>) {
             listOf(ToolbarItem.WAND, ToolbarItem.TAPE, ToolbarItem.SHAPE, ToolbarItem.RULER, ToolbarItem.TEXT, ToolbarItem.TEXT_BOX, ToolbarItem.MARKUP),
             listOf(ToolbarItem.IMAGE),
             listOf(ToolbarItem.COLORS),
-            listOf(ToolbarItem.UNDO, ToolbarItem.REDO),
-            listOf(ToolbarItem.PAGE_NAV, ToolbarItem.STYLES, ToolbarItem.MARGINS, ToolbarItem.VIEW),
+            listOf(ToolbarItem.STYLES, ToolbarItem.MARGINS),
             listOf(ToolbarItem.ZOOM, ToolbarItem.FIT, ToolbarItem.ZOOM_LOCK),
-            listOf(ToolbarItem.FULLSCREEN),
+            listOf(ToolbarItem.VIEW, ToolbarItem.FULLSCREEN),
         )
 
         /** Mirrors the hardcoded canvas bar (see InfiniteToolbar.kt). */

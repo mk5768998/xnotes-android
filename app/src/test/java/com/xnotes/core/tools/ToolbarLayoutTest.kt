@@ -14,8 +14,11 @@ class ToolbarLayoutTest {
 
     @Test fun defaultMirrorsToolbarGrouping() {
         val d = ToolbarLayout.DEFAULT
-        assertEquals(11, d.sections.size)
-        assertEquals(listOf(ToolbarItem.HOME, ToolbarItem.TITLE), d.sections[0].entries.map { it.item })
+        assertEquals(10, d.sections.size)
+        assertEquals(
+            listOf(ToolbarItem.HOME, ToolbarItem.TITLE, ToolbarItem.SIDEBAR, ToolbarItem.PAGE_NAV),
+            d.sections[0].entries.map { it.item },
+        )
         assertEquals(
             listOf(
                 ToolbarItem.PEN, ToolbarItem.DASHED, ToolbarItem.CALLIGRAPHY, ToolbarItem.SPEED,
@@ -31,7 +34,7 @@ class ToolbarLayoutTest {
             listOf(ToolbarItem.WAND, ToolbarItem.TAPE, ToolbarItem.SHAPE, ToolbarItem.RULER, ToolbarItem.TEXT, ToolbarItem.TEXT_BOX, ToolbarItem.MARKUP),
             d.sections[4].entries.map { it.item },
         )
-        assertEquals(listOf(ToolbarItem.FULLSCREEN), d.sections[10].entries.map { it.item })
+        assertEquals(listOf(ToolbarItem.VIEW, ToolbarItem.FULLSCREEN), d.sections[9].entries.map { it.item })
     }
 
     @Test fun defaultContainsEveryItemOnce() {

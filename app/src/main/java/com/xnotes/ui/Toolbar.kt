@@ -73,6 +73,7 @@ import com.xnotes.R
 import com.xnotes.core.model.Rgba
 import com.xnotes.core.tools.Tool
 import com.xnotes.core.tools.ToolbarItem
+import com.xnotes.core.tools.ToolbarSection
 import com.xnotes.platform.ImageDecoder
 import com.xnotes.ui.icons.XnotesIcons
 import com.xnotes.ui.theme.LocalPalette
@@ -122,11 +123,10 @@ fun Toolbar(
     var configForTool by remember { mutableStateOf<Tool?>(null) }
     var switcherIndex by remember { mutableStateOf<Int?>(null) }
     var renaming by remember { mutableStateOf(false) }
-    // Pinned outside the scrolling strip so closing a split pane is always one tap away.
-    ToolbarFrame(armed = editor.tool, trailing = onClosePane?.let { { ClosePaneButton(it) } }) {
-        // The bar is driven by the user-customisable layout; separators sit between non-empty
-        // sections, and each item dispatches to its renderer (see ToolbarItemView).
-        editor.toolbarLayout.visibleSections.forEachIndexed { si, section ->
+    // The bar is driven by the user-customisable layout; separators sit between non-empty
+    // sections, and each item dispatches to its renderer (see ToolbarItemView).
+    val run: @Composable (List<ToolbarSection>) -> Unit = { sections ->
+        sections.forEachIndexed { si, section ->
             if (si > 0) Separator()
             section.visibleEntries.forEach { entry ->
                 ToolbarItemView(
@@ -149,6 +149,21 @@ fun Toolbar(
                 )
             }
         }
+    }
+    val sections = editor.toolbarLayout.visibleSections
+    // Pinned outside the scrolling strip so closing a split pane is always one tap away.
+    val trailing = onClosePane?.let { { ClosePaneButton(it) } }
+    val look = LocalToolbarLook.current
+    if (look.floating && !look.position.vertical && sections.size >= 3) {
+        ToolbarPills(
+            armed = editor.tool,
+            trailing = trailing,
+            first = { run(sections.take(1)) },
+            middle = { run(sections.subList(1, sections.lastIndex)) },
+            last = { run(sections.takeLast(1)) },
+        )
+    } else {
+        ToolbarFrame(armed = editor.tool, trailing = trailing) { run(sections) }
     }
 
     if (renaming) {
